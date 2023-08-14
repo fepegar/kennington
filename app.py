@@ -24,7 +24,7 @@ def process(url: str) -> None:
         return
     videos_dir = wetransfer.unzip(zip_path)
     videos_paths = sorted(videos_dir.iterdir())
-    st.write(f"{len(videos_paths)} files found")
+    st.toast(f"{len(videos_paths)} files found")
     videos = [Video(video_path) for video_path in videos_paths]
 
     my_bar = st.progress(0)
