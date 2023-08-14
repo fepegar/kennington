@@ -31,7 +31,7 @@ def process(url: str) -> None:
     for i, video in enumerate(videos):
         my_bar.progress(
             value=i / len(videos),
-            text=f"Processing ({i + 1}/{len(videos)})...",
+            text=f"Processing video {i + 1}/{len(videos)}...",
         )
         video.check_encoding()
         st.write(f"**{video.alias}**")
