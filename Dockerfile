@@ -23,7 +23,7 @@ ENV PATH=$PATH:/usr/local/go/bin
 
 # Install wedl
 RUN cd / \
-    && git clone https://github.com/gnojus/wedl.git \
+    && git clone https://github.com/fepegar/wedl.git \
     && cd wedl \
     && make
 ENV WEDL_PATH=/wedl/wedl
