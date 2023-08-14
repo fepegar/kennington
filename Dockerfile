@@ -2,13 +2,18 @@ FROM python:3.10-slim
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y \
+# SSH stuff from https://learn.microsoft.com/en-us/azure/app-service/tutorial-custom-container?tabs=azure-cli&pivots=container-linux
+ENV SSH_PASSWD "root:Docker!"
+RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         build-essential \
         curl \
+        dialog \
         ffmpeg \
         git \
-    && rm -rf /var/lib/apt/lists/*
+        openssh-server \
+    && rm -rf /var/lib/apt/lists/* \
+    && echo "$SSH_PASSWD" | chpasswd
 
 # Install Go
 RUN curl -LO https://go.dev/dl/go1.21.0.linux-amd64.tar.gz \
@@ -25,7 +30,7 @@ ENV WEDL_PATH=/wedl/wedl
 
 # Install Python dependencies
 COPY requirements.txt .
-RUN pip install -r requirements.txt \
+RUN pip install -r requirements.txt --no-cache-dir \
     && rm requirements.txt
 
 # Copy app files
@@ -37,7 +42,12 @@ ENV PYTHONHASHSEED=0
 
 # Expose Streamlit port
 EXPOSE 8501
-
 HEALTHCHECK CMD curl --fail http://localhost:8501/_stcore/health
 
-ENTRYPOINT ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+# SSH stuff from https://learn.microsoft.com/en-us/azure/app-service/tutorial-custom-container?tabs=azure-cli&pivots=container-linux
+COPY sshd_config /etc/ssh/
+COPY init.sh /usr/local/bin/
+RUN chmod u+x /usr/local/bin/init.sh
+EXPOSE 2222
+
+ENTRYPOINT ["init.sh"]
